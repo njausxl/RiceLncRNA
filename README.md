@@ -190,6 +190,6 @@ rule taco_run:
         -o {output} \
         {input.gtf}
 ```
-## 开始运行snakemake
+## snakemake
 snakemake --latency-wait 60 -ps snakemake.py --cores 22
 
