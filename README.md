@@ -1,5 +1,5 @@
 # RiceLncRNA
-## 1. 创建环境
+## 1. conda
 conda create --name CodingRNA_database_pipeline python=3.7
 
 conda activate CodingRNA_database_pipeline
@@ -20,7 +20,7 @@ wget http://rice.plantbiology.msu.edu/download/Genome_MSU_r7.tar.gz
 tar -xvf Genome_MSU_r7.tar.gz
 hisat2-build Genome_MSU_r7.tar.gz hisat2_index/rice7_index
 
-## 4. 创建 snakemake文件
+## 4. snakemake
 vim snakemake_coding.py
 
 ```python
