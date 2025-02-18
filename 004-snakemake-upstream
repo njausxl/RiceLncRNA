@@ -23,137 +23,226 @@ hisat2-build Genome_MSU_r7.tar.gz hisat2_index/rice7_index
 ## 4. snakemake
 vim snakemake_coding.py
 
+
 ```python
-workdir:"~/CodingRNA_database_pipeline/"
-
-### 4.1 Get all sample names
-import glob
-
-#### Add a variable to specify file format
-file_format = "sra"  # can be "sra" or "fastq.gz"
-
-if file_format == "sra":
-    samples = [x.split('/')[-1].split('.')[0] for x in glob.glob('sra/*.sra')]
-elif file_format == "fastq.gz":
-    samples = [x.split('/')[-1].split('_')[0] for x in glob.glob('fastq/*.fastq.gz')]
-
-
-
-#### Specify specific samples for analysis
-# samples=["Sample1","Sample2","Sample3"]
-
-#### 4.2 Activate environment
+## 1. Environment activation rule
 onstart:
     shell("""
-        source ~/miniconda3/bin/activate CodingRNA_database_pipeline
+        source /gss1/env_os7/snakemake.env
+        source /gss1/env/hisat2.env
+        source /gss1/env/bowtie2.env
+        source /gss1/env/fastp.env
+        source /gss1/env/TrimGalore_v0.6.7.env
+        source /gss1/env/samtools-1.11.env
+        source /gss1/env/multiqc.env
+        source /gss1/env/fastqc.env
+        source /gss1/env/sratoolkit.2.10.0.env
     """)
 
-#### 4.3 Check if folder exists
-rule check_folder:
-    output:
-        "path/to/your/folder/"
-    shell:
-        "[ -d {output} ] || mkdir -p {output}"
+workdir: "/gss1/home/hzhao/temp/data"
+samples = ["A", "B"]
 
-#### 4.4 Total output files
 rule all:
     input:
-        expand("hisat2/{sample}_sorted.bam", sample=samples),
-        "multiqc_report/multiqc_report.html",
-        "multiqc_report2/multiqc_report.html",
-        expand("stringtie/{sample}.gtf",sample=samples)
+        expand("hisat2/{sample}_sorted.bam", sample=["A","B"]),
+        "multiqc_report/multiqc_report.html"
 
 
 
-def check_samples(samples):
-    """Check if sample names are correct"""
-    for sample in samples:
-        if sample not in samples:
-            raise ValueError(f"Sample name {sample} does not exist")
-
-### 4.5 Start running
-if file_format == "sra":
-#### 4.5.1 fasterq-dump
-    rule fasterq_dump:
-        input:
-            "sra/{sample}.sra"
-        output:
-            r1 = "read1/{sample}_1.fastq",
-            r2 = "read1/{sample}_2.fastq"
-        threads: 21
-        run:
-            import os.path as path
-            output_dir = path.dirname(output.r1)
-            shell(
-                f"fasterq-dump.3.0.2 -e {threads} -f --split-files {input} -O {output_dir}"
-            )
-
-#### 4.5.2 pigz compress
-    rule pigz_compress:
-        input:
-            r1 = "read1/{sample}_1.fastq",
-            r2 = "read1/{sample}_2.fastq"
-        output:
-            r1 = "read1/{sample}_1.fastq.gz",
-            r2 = "read1/{sample}_2.fastq.gz"
-        threads: 21
-        shell:
-            """
-            pigz -7 -p {threads} {input.r1}
-            pigz -7 -p {threads} {input.r2}
-            """
-
-#### 4.5.3 fastqc
+# 2. fastqc
 rule fastqc:
     input:
-        r1="read1/{sample}_1.fastq.gz",
-        r2="read1/{sample}_2.fastq.gz"
+        r1="reads/{sample}_1.fq",
+        r2="reads/{sample}_2.fq"
     output:
         html1="qc/fastqc/{sample}_1_fastqc.html",
-        zip1 ="qc/fastqc/{sample}_1_fastqc.zip",
+        zip1="qc/fastqc/{sample}_1_fastqc.zip",
         html2="qc/fastqc/{sample}_2_fastqc.html",
-        zip2 ="qc/fastqc/{sample}_2_fastqc.zip"
+        zip2="qc/fastqc/{sample}_2_fastqc.zip"
     params:
         extra="--quiet"
     log:
         "log/fastqc/{sample}.log"
+    threads: 1
+    shell:
+        """
+        fastqc --threads {threads} {params.extra} --outdir qc/fastqc {input.r1} {input.r2}
+        """
+
+
+
+# 3. multiqc
+
+
+
+rule multiqc:
+    input:
+        htmls=expand("qc/fastqc/{sample}_{reads}_fastqc.html", sample=["A", "B"], reads=["1", "2"])
+    output:
+        "multiqc_report/multiqc_report.html"
+    log:
+        "log/multiqc.log"
     run:
-            shell("""
-                fastqc --threads {threads} {params.extra} --outdir qc/fastqc {input.r1} {input.r2}
-            """)
+        from os import path
+        from snakemake.shell import shell
+
+        input_data = set(path.dirname(fp) for fp in input.htmls)
+        output_dir = path.dirname(output[0])
+        output_name = path.basename(output[0])
+        log_file = log[0]
+
+        shell(
+            f"multiqc --force -o {output_dir} -n {output_name} {' '.join(input_data)} > {log_file} 2>&1"
+        )
+
+## 4. fastp
+
+rule fastp:
+    input:
+        r1="reads/{sample}_1.fq",
+        r2="reads/{sample}_2.fq"
+    output:
+        out1="trimmedFp/{sample}.1.fq.gz",
+        out2="trimmedFp/{sample}.2.fq.gz",
+        html="report/{sample}_fastp.html",
+        log="log/fastp/{sample}_fastp.log",
+        json="report/{sample}_fastp.json"
+    threads: 1
+    shell:
+        """
+        source /gss1/env/fastp.env
+        fastp \
+        --detect_adapter_for_pe \
+        --in1 {input.r1} \
+        --in2 {input.r2} \
+        --out1 {output.out1} \
+        --out2 {output.out2} \
+        --html {output.html} \
+        --json {output.json} \
+        -w {threads} \
+        -z 7 \
+        -q 20 \
+        -u 20 \
+        -c \
+        -n 4 \
+        2> {output.log}
+        """
 
 
-#### 4.5.4 hisat2
 
-## --rna-strandness FR  # Forward data
-## --rna-strandness RF  # Reverse data
 
+
+## 5. trim_galore
+
+rule trim_galore:
+    input:
+        r1="trimmedFp/{sample}.1.fq.gz",
+        r2="trimmedFp/{sample}.2.fq.gz"
+    output:
+        r1="trimmedTrim/{sample}.1_val_1.fq.gz",
+        r2="trimmedTrim/{sample}.2_val_2.fq.gz",
+        log="log/trimgalory/{sample}.log"
+    threads: 20
+    params:
+        outdir="trimmedTrim/"
+    shell:
+        """
+        mkdir -p {params.outdir}
+        trim_galore \
+        --gzip \
+        -j {threads} \
+        --paired \
+        -o {params.outdir} \
+        {input.r1} \
+        {input.r2} \
+        -q 20 \
+        --length 15 \
+        --stringency 3 \
+        -e 0.1 \
+        &> {output.log}
+        """
+
+
+## 6. bowtie2
+
+
+rule bowtie2:
+    input:
+        r1="trimmedTrim/{sample}.1_val_1.fq.gz",
+        r2="trimmedTrim/{sample}.2_val_2.fq.gz",
+        idx=expand("/gss1/home/hzhao/lncRNA_analysis/2_reference/OSA_rRNA.{n}.bt2", n=[1, 2, 3, 4, "rev.1", "rev.2"])
+    output:
+        unpaired1="bowtie2/{sample}_clean.1.fastq.gz",
+        unpaired2="bowtie2/{sample}_clean.2.fastq.gz"
+    params:
+        temp_sam=temp("bowtie2/{sample}_temp.sam")
+    resources:
+        mem_mb=10240
+    log:
+        "log/bowtie2/{sample}.log"
+    threads: 1
+    run:
+        from os import path, rename
+        from snakemake.shell import shell
+
+        # 获取输出文件的目录
+        output_dir = path.dirname(output.unpaired1)
+
+        # 获取索引的公共前缀
+        index_prefix = path.commonprefix(input.idx).rstrip('.')
+
+        # 构建 bowtie2 命令
+        cmd = (
+            f"mkdir -p {output_dir} && "
+            f"source /gss1/env/bowtie2.env && "
+            f"bowtie2 --very-sensitive-local --no-unal --no-head -I 1 -X 1000 "
+            f"-p {threads} -x {index_prefix} -1 {input.r1} -2 {input.r2} "
+            f"--un-conc-gz {output_dir}/un-conc-mate "
+            f"-S {params.temp_sam} 2> {log[0]}"
+        )
+
+        # 执行命令
+        shell(cmd)
+
+        # 重命名 Bowtie2 生成的文件以匹配 output 字段
+        rename(f"{output_dir}/un-conc-mate.1", output.unpaired1)
+        rename(f"{output_dir}/un-conc-mate.2", output.unpaired2)
+
+
+
+
+
+# 7. hisat2
 rule hisat2:
     input:
         r1="bowtie2/{sample}_clean.1.fastq.gz",
         r2="bowtie2/{sample}_clean.2.fastq.gz",
-        idx=expand("hisat2_index/rice7_all.{i}.ht2", i=range(1,9))
+        idx=expand(
+            "/gss1/home/hzhao/temp/data/genome/lambda.{i}.ht2",
+            i=range(1,9)
+        )
     output:
         bam="hisat2/{sample}_sorted.bam"
     log:
         "log/hisat2/{sample}.log"
-    threads: 26
-    run:
-        import os
-        os.environ['TMPDIR'] = '~/temp/'
-        idx_prefix = os.path.commonprefix(input.idx).rstrip(".1.ht2")
+    threads: 1
 
-        shell(
-            f"""
-            hisat2 \
-            --threads {threads} \
-            -x {idx_prefix} \
-            -1 {input.r1} \
-            -2 {input.r2} \
-            | samtools sort -O bam -@ {threads} -o {output.bam} -
-            2> {log}
-            """
-        )
+    shell:
+        """
+        idx_prefix=$(python -c 'import os; print(os.path.commonprefix(["{input.idx[0]}"]).rstrip(".1.ht2"))')
+
+        hisat2 \
+        --threads {threads} \
+        --rna-strandness RF \
+        -x $idx_prefix \
+        -1 {input.r1} \
+        -2 {input.r2} \
+        | samtools view -Sbh - \
+        | samtools sort -O bam -@ {threads} -o {output.bam} -
+        2> {log}
+        """
+```
+
 #### 4.5.5 stringtie
 
 rule stringtie:
