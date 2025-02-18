@@ -114,7 +114,6 @@ ls *gz|cut -d"_" -f 1|sort -u | while read id;
     
     > **Note**: Use the appropriate `--rna-strandness` option (e.g., `RF` or `FR`) based on the library preparation.
     
-
 # 6） Transcript Assembly and Merging
 
 # 1. Assemble transcripts for each sample using StringTie
@@ -140,8 +139,6 @@ taco_run -p 8 \
          ./lncRNA_gtf.list \
          --ref-genome-fasta /reference_genome.fa \
          --filter-splice-juncs
-
-    
 
 ## 7) Using the CodingRNA Database to Extract Class Codes
 
