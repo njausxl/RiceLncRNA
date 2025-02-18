@@ -1,195 +1,257 @@
-# RiceLncRNA
-## 1. conda
-conda create --name CodingRNA_database_pipeline python=3.7
-
-conda activate CodingRNA_database_pipeline
-
-conda install -c bioconda taco
-## 2. Create folders
-mkdir -p ~/CodingRNA_database_pipeline/
-cd ~/CodingRNA_database_pipeline
-mkdir -p sra
-mkdir -p fastq
-mkdir -p hisat2_index
-mkdir -p fastqc
-mkdir -p taco
-mkdir -p hisat2_index
-
-## 3. Download genome files    
-wget http://rice.plantbiology.msu.edu/download/Genome_MSU_r7.tar.gz
-tar -xvf Genome_MSU_r7.tar.gz
-hisat2-build Genome_MSU_r7.tar.gz hisat2_index/rice7_index
-
-## 4. snakemake
-vim snakemake_coding.py
-
-```python
-workdir:"~/CodingRNA_database_pipeline/"
-
-### 4.1 Get all sample names
-import glob
-
-#### Add a variable to specify file format
-file_format = "sra"  # can be "sra" or "fastq.gz"
-
-if file_format == "sra":
-    samples = [x.split('/')[-1].split('.')[0] for x in glob.glob('sra/*.sra')]
-elif file_format == "fastq.gz":
-    samples = [x.split('/')[-1].split('_')[0] for x in glob.glob('fastq/*.fastq.gz')]
 
 
+# RiceLncRNA: An Optimized Pipeline for Rice Long Non-coding RNA Identification
 
-#### Specify specific samples for analysis
-# samples=["Sample1","Sample2","Sample3"]
+## Project Overview
 
-#### 4.2 Activate environment
-onstart:
-    shell("""
-        source ~/miniconda3/bin/activate CodingRNA_database_pipeline
-    """)
+This project provides a comprehensive pipeline for lncRNA identification and analysis, from CodingRNA database construction to lncRNA identification and analysis. The pipeline integrates multiple bioinformatics tools to achieve full-process analysis from raw data processing to functional annotation.
 
-#### 4.3 Check if folder exists
-rule check_folder:
-    output:
-        "path/to/your/folder/"
-    shell:
-        "[ -d {output} ] || mkdir -p {output}"
+The project consists of four main modules:
+- Module 001: Basic data processing environment for raw data QC, alignment, and assembly
+- Module 002: LncRNA identification environment focusing on non-coding RNA prediction and screening
+- Module 003: Functional analysis environment for expression analysis and functional annotation
+- Module 004: Basic data processing environment (snakemake one-click run) for raw data QC, alignment, and assembly
 
-#### 4.4 Total output files
-rule all:
-    input:
-        expand("hisat2/{sample}_sorted.bam", sample=samples),
-        "multiqc_report/multiqc_report.html",
-        "multiqc_report2/multiqc_report.html",
-        expand("stringtie/{sample}.gtf",sample=samples)
+⚠️ Important Notes:
+- This pipeline involves multiple programming languages including Python, R, and Perl
+- Integrates over 30 professional bioinformatics software tools
+- Due to complex dependencies, one-click installation and usage is not possible
+- Recommended to install and run each module step by step
+- Verify output results before proceeding to the next step
 
+## Features
+- CodingRNA database construction
+- Raw data quality control and preprocessing
+- Reference genome-based transcript assembly
+- Strict screening process for long non-coding RNA
+- Transcript functional annotation and analysis
+- Support for multi-sample parallel processing
+- Integration of multiple professional bioinformatics tools
 
+## System Requirements
 
-def check_samples(samples):
-    """Check if sample names are correct"""
-    for sample in samples:
-        if sample not in samples:
-            raise ValueError(f"Sample name {sample} does not exist")
+- Linux/Unix operating system
+- Python ≥ 3.7
+- R ≥ 4.0
+- Conda package manager
 
-### 4.5 Start running
-if file_format == "sra":
-#### 4.5.1 fasterq-dump
-    rule fasterq_dump:
-        input:
-            "sra/{sample}.sra"
-        output:
-            r1 = "read1/{sample}_1.fastq",
-            r2 = "read1/{sample}_2.fastq"
-        threads: 21
-        run:
-            import os.path as path
-            output_dir = path.dirname(output.r1)
-            shell(
-                f"fasterq-dump.3.0.2 -e {threads} -f --split-files {input} -O {output_dir}"
-            )
+## Dependencies
 
-#### 4.5.2 pigz compress
-    rule pigz_compress:
-        input:
-            r1 = "read1/{sample}_1.fastq",
-            r2 = "read1/{sample}_2.fastq"
-        output:
-            r1 = "read1/{sample}_1.fastq.gz",
-            r2 = "read1/{sample}_2.fastq.gz"
-        threads: 21
-        shell:
-            """
-            pigz -7 -p {threads} {input.r1}
-            pigz -7 -p {threads} {input.r2}
-            """
+Major bioinformatics tools:
+- HISAT2 (transcriptome alignment)
+- StringTie (transcript assembly)
+- TACO (transcript integration)
+- FastQC (sequencing data QC)
+- Samtools (SAM/BAM file processing)
+- MultiQC (QC report integration)
+- Bowtie2 (transcriptome alignment)
+- GFFread (GFF/GTF file conversion)
+- Gffcompare (transcript assembly evaluation)
+- Fastp (raw data QC)
+- TrimGalore (raw data QC)
+- seqkit (sequence processing)
+- transeq (sequence translation)
+- pfam_scan.pl (Pfam database alignment)
+- cmscan (Rfam database alignment)
+- Diamond (NR database alignment)
+- Snakemake (workflow management)
+- PLEK (lncRNA identification)
+- cnci (lncRNA identification)
+- cpc2 (lncRNA identification)
+- FeatureCounts (expression quantification)
+- DESeq2 (differential expression analysis)
+- wgcna (WGCNA analysis)
+- clusterProfiler (functional enrichment analysis)
+- gseGO (GO enrichment analysis)
+- gseKEGG (KEGG enrichment analysis)
+- enrichplot (enrichment result visualization)
+- ggplot2 (result visualization)
 
-#### 4.5.3 fastqc
-rule fastqc:
-    input:
-        r1="read1/{sample}_1.fastq.gz",
-        r2="read1/{sample}_2.fastq.gz"
-    output:
-        html1="qc/fastqc/{sample}_1_fastqc.html",
-        zip1 ="qc/fastqc/{sample}_1_fastqc.zip",
-        html2="qc/fastqc/{sample}_2_fastqc.html",
-        zip2 ="qc/fastqc/{sample}_2_fastqc.zip"
-    params:
-        extra="--quiet"
-    log:
-        "log/fastqc/{sample}.log"
-    run:
-            shell("""
-                fastqc --threads {threads} {params.extra} --outdir qc/fastqc {input.r1} {input.r2}
-            """)
+## Installation Guide
 
+1. Create three independent conda environments:
 
-#### 4.5.4 hisat2
-
-## --rna-strandness FR  # Forward data
-## --rna-strandness RF  # Reverse data
-
-rule hisat2:
-    input:
-        r1="bowtie2/{sample}_clean.1.fastq.gz",
-        r2="bowtie2/{sample}_clean.2.fastq.gz",
-        idx=expand("hisat2_index/rice7_all.{i}.ht2", i=range(1,9))
-    output:
-        bam="hisat2/{sample}_sorted.bam"
-    log:
-        "log/hisat2/{sample}.log"
-    threads: 26
-    run:
-        import os
-        os.environ['TMPDIR'] = '~/temp/'
-        idx_prefix = os.path.commonprefix(input.idx).rstrip(".1.ht2")
-
-        shell(
-            f"""
-            hisat2 \
-            --threads {threads} \
-            -x {idx_prefix} \
-            -1 {input.r1} \
-            -2 {input.r2} \
-            | samtools sort -O bam -@ {threads} -o {output.bam} -
-            2> {log}
-            """
-        )
-#### 4.5.5 stringtie
-
-rule stringtie:
-    input:
-        bam="hisat2/{sample}_sorted.bam"
-    output:
-        gtf="stringtie/{sample}.gtf"
-    params:
-        threads=28
-    shell:
-        """
-        stringtie \
-        -p {params.threads} -v \
-        --rf \
-        -o {output.gtf} \
-        {input.bam}
-        """
-
-
-#### 4.5.6. taco_run
-
-rule taco_run:
-    input:
-        gtf=expand("stringtie/pe/{sample}.gtf", sample=SAMPLES)
-    output:
-        directory("taco_run/pe/")
-    params:
-        threads=8
-    conda:
-        "/gss1/home/hzhao/20230411/2023-09-17_translatome/py2_environment.yaml"
-    shell:
-        """
-        taco_run -p {params.threads} \
-        -o {output} \
-        {input.gtf}
+### Environment 001: Basic Data Processing Environment
+```bash
+conda create -n lncrna_001 python=3.7
+conda activate lncrna_001
+conda install -c bioconda hisat2 stringtie taco fastqc samtools multiqc bowtie2 gffread gffcompare fastp trim-galore seqkit emboss
 ```
-## snakemake
-snakemake --latency-wait 60 -ps snakemake.py --cores 22
+
+### Environment 002: LncRNA Identification Environment
+```bash
+conda create -n lncrna_002 python=3.7
+conda activate lncrna_002
+conda install -c bioconda plek cnci cpc2
+conda install -c bioconda diamond pfam_scan hmmer infernal
+```
+
+### Environment 003: Functional Analysis Environment
+```bash
+conda create -n lncrna_003 r=4.0
+conda activate lncrna_003
+conda install -c bioconda bioconductor-deseq2 bioconductor-wgcna bioconductor-clusterprofiler
+conda install -c conda-forge r-ggplot2
+conda install -c bioconda subread  # for FeatureCounts
+```
+
+2. Create working directories:
+```bash
+# Create main directory
+mkdir -p ~/rice_lncrna_pipeline
+cd ~/rice_lncrna_pipeline
+
+# Create raw data directory
+mkdir -p raw_data/{sra,fastq}
+
+# Create QC-related directories
+mkdir -p qc/{fastqc,multiqc}
+
+# Create alignment and assembly directories
+mkdir -p alignment/{hisat2_index,hisat2_output,stringtie_output}
+mkdir -p assembly/{taco_output,merged_transcripts}
+
+# Create lncRNA identification directory
+mkdir -p lncrna/{plek,cnci,cpc2,merged_results}
+
+# Create functional analysis directory
+mkdir -p analysis/{expression,deseq2,wgcna,enrichment}
+
+# Create results and log directories
+mkdir -p results
+mkdir -p logs
+```
+
+3. Download reference genome:
+```bash
+cd ~/rice_lncrna_pipeline
+wget http://rice.plantbiology.msu.edu/pub/data/Eukaryotic_Projects/o_sativa/annotation_dbs/pseudomolecules/version_7.0/all.dir/Osativa_204_v7.0.fa.gz
+gunzip Osativa_204_v7.0.fa.gz
+mv Osativa_204_v7.0.fa reference/
+cd alignment/hisat2_index
+hisat2-build ../../reference/Osativa_204_v7.0.fa rice7_index
+```
+
+## Analysis Pipeline
+
+### 1. CodingRNA Database Construction (Environment 001)
+- Data collection and download
+- Data quality control
+- rRNA sequence removal
+- Reference genome alignment
+- Transcript assembly and merging
+- Comparison with reference genome annotation
+- Final fusion with original genome annotation, database generation
+
+### 2. RNA-seq Data Analysis (Environment 002)
+
+#### 2.1 Data Collection and Download
+- Collect published rice RNA-seq data
+- Download raw data using SRA toolkit
+- Convert to FASTQ format
+
+
+
+#### 2.2 Data Quality Control
+- Quality assessment using FastQC
+- QC report integration using MultiQC
+- Low-quality sequence and adapter removal using Fastp
+
+#### 2.3 rRNA Sequence Removal
+- Bowtie2 alignment to rRNA database
+- Non-rRNA sequence extraction
+- Quality reassessment
+
+#### 2.4 Reference Genome Alignment
+- Alignment using HISAT2
+- SAM/BAM file conversion and sorting using SAMtools
+- Generate alignment statistics report
+
+#### 2.5 Transcript Assembly and Merging
+- Transcript assembly using StringTie
+- Merge GTF files from multiple samples
+- Generate non-redundant transcript set
+
+#### 2.6 Reference Genome Annotation Comparison
+- Compare annotation files using GFFcompare
+- Extract known coding genes
+- Construct coding RNA database
+
+### 3. Non-coding RNA Database Construction (Environment 002)
+
+#### 3.1 Data Preprocessing
+- Extract transcripts with class codes i,u,x,o,p
+- Length filtering (>200nt)
+- Exon number filtering
+
+#### 3.2 Coding Potential Assessment
+- CPC2 analysis
+- CNCI analysis
+- PLEK analysis
+- Rfam/Pfam/NR database alignment
+- Integration of all software identification results
+
+#### 3.3 LncRNA Classification
+- Long non-coding RNA identification
+- Classification (antisense, intronic, intergenic, etc.)
+- Integration with known lncRNA database information
+
+### 4. Functional Analysis and Annotation (Environment 003)
+
+#### 4.1 Expression Analysis
+- Calculate expression levels in each sample
+- Expression normalization
+- Sample correlation analysis
+
+#### 4.2 Differential Expression Analysis
+- DESeq2 differential expression analysis
+- Differential gene screening
+
+#### 4.3 Co-expression Network Analysis
+- WGCNA co-expression network construction
+- Module identification and analysis
+- Key gene screening
+
+#### 4.4 Functional Enrichment Analysis
+- GO functional enrichment analysis
+- KEGG pathway enrichment analysis
+- Functional annotation visualization
+
+#### 4.5 Individual lncRNA GSEA Analysis
+- Functional enrichment analysis
+- Result visualization
+
+## Precautions
+
+### Environment Configuration
+1. Ensure all dependencies are correctly installed
+2. Check software version compatibility
+3. Properly allocate computational resources
+
+### Data Processing
+1. Regularly backup important data
+2. Record key parameter settings
+3. Save analysis log files
+
+### Result Interpretation
+1. Pay attention to biological replication
+2. Focus on data quality control results
+3. Validate reliability of key findings
+
+## Citation
+
+If you use this pipeline, please cite the following paper:
+
+Shan, X., Xia, S., Peng, L., Tang, C., Tao, S., Baig, A., & Zhao, H. (2024). Identification of Rice LncRNAs and Their Roles in the Rice Blast Resistance Network Using Transcriptome and Translatome. *Plants* (Under Review).
+
+## Contact Information
+- Issue Feedback: [GitHub Issues]
+- Email Contact: [sdausxl@126.com]
+
+## Change Log
+- 2024-02-17: Initial Version V1.0 Release
+- Upcoming: Continuous pipeline optimization
+- Upcoming: Addition of new analysis tools
+````
+
 
