@@ -242,47 +242,6 @@ hisat2-build ../../reference/Osativa_204_v7.0.fa rice7_index
 3. Validate reliability of key findings
 
 
-## RiceLncRNA Repository
-
-### 1. Overview
-
-This repository contains essential datasets and tools for the analysis of long non-coding RNAs (lncRNAs) in rice, focusing on their roles in plant immunity.
-
-### 2. Dataset Contents
-
-#### 2.1 OSA rRNA
-- **File**: `OSA_rRNA.fa`
-- **Description**: Contains the ribosomal RNA (rRNA) sequences of rice (*Oryza sativa*). This file is used for filtering rRNA contamination during RNA-seq preprocessing.
-
-#### 2.2 OSA Known LncRNA
-- **File**: `OSA_Known_LncRNA.zip`
-- **Description**: A zip file containing known lncRNA sequences from multiple lncRNA databases specifically for rice. It is useful for the identification and annotation of lncRNAs in rice.
-
-#### 2.3 Rice7 Genomic Data
-- **File**: `rice7_all_fa.zip`
-- **Description**: This archive contains the rice genome sequence (MSU v7) in FASTA format. It serves as a reference for genome-wide RNA-seq alignment and other genomic analyses.
-
-- **File**: `rice7_all_gtf.zip`
-- **Description**: Contains the MSU v7 gene annotation in GTF format. It is essential for the functional annotation of RNA-seq data.
-
-#### 2.4 Org RiceDB (GO/KEGG Enrichment)
-- **File**: `org_riceDB_AH94060.zip`
-- **Description**: This archive contains the rice-specific annotation database (OrgDb) used for performing GO and KEGG enrichment analyses. It provides necessary gene annotations for functional analysis of rice-related data.
-
-### 3. Dataset Usage
-
-These datasets provide fundamental resources for transcriptomic and functional analyses, such as the identification of lncRNAs, alignment of RNA-seq data, and gene annotation. You can use these files for a variety of bioinformatics analyses, such as:
-
-- **rRNA Filtering**: Use `OSA_rRNA.fa` to filter out rRNA sequences during RNA-seq preprocessing.
-- **LncRNA Identification**: Use `OSA_Known_LncRNA.zip` to compare with newly identified lncRNAs in your RNA-seq dataset.
-- **Genomic Alignment**: Align your RNA-seq reads to the reference genome found in `rice7_all_fa.zip`.
-- **Gene Annotation**: Annotate your aligned reads using the `rice7_all_gtf.zip` file.
-- **GO/KEGG Enrichment**: For functional enrichment analysis, `org_riceDB_AH94060.zip` is used to provide necessary gene annotations for rice.
-
-### 4. Acknowledgements
-
-The datasets and annotations used in this repository have been generously provided by various contributors. These datasets are crucial for the research and development of the RiceLncRNA pipeline and facilitate the study of lncRNAs in rice.
-
 ## License
 This repository is licensed under the MIT License. See the LICENSE file for more details.
 
@@ -300,4 +259,75 @@ Shan, X., Xia, S., Peng, L., Tang, C., Tao, S., Baig, A., & Zhao, H. (2024). Ide
 - 2024-02-17: Initial Version V1.0 Release
 - Upcoming: Continuous pipeline optimization
 - Upcoming: Addition of new analysis tools
+
+
+## RiceLncRNA Repository
+
+This repository contains various datasets and resources related to the identification and functional analysis of long noncoding RNAs (lncRNAs) in rice (Oryza sativa). All data here are based on **Oryza sativa Japonica** (commonly known as Japonica rice). If you plan to use other rice varieties (e.g., Indica rice), please carefully cross-check the data for compatibility.
+
+## Data Files
+
+Below is a list of files in this repository and their descriptions:
+
+### 1. **s001-OSA_Known_LncRNA.zip**
+   - Contains known rice lncRNAs from multiple databases. This file is crucial for the identification and analysis of rice lncRNAs.
+
+### 2. **s002-OSA_rRNA.fa**
+   - This file contains the ribosomal RNA (rRNA) sequences for **Oryza sativa**. These sequences are used as references in RNA-seq analyses to filter out rRNA from the data.
+
+### 3. **s003-rice7_all_gtf.zip**
+   - Contains the GTF (General Feature Format) file of the **MSU V7 rice genome annotation**. This is a reference genome annotation file for use in RNA-seq analysis and transcript annotation.
+
+### 4. **s004-rice7_all_fa.zip**
+   - Contains the **MSU V7 rice genome sequence** in FASTA format. This file includes all genomic sequences that are used for alignment during transcriptome analysis.
+
+### 5. **s005-RiceSymbolGoAnnotation.xlsx**
+   - This file contains **symbol IDs and Gene Ontology (GO) annotations** for rice genes. It helps in the functional annotation of genes and the analysis of biological functions using GO terms.
+
+### 6. **s006-org_riceDB_AH94060.zip**
+   - A zip file containing the **org.db package for rice**. This package is used for gene enrichment analysis (GO, KEGG, etc.) and provides key rice gene information in the appropriate format for enrichment tools.
+
+### 7. **s007-OryzabaseGeneListGOKEGGSymbolTraitsRice.xlsx**
+   - This file contains detailed information about **rice gene GO and KEGG annotations**, as well as **symbol IDs and trait information**. It is essential for understanding gene function and performing further analysis such as pathway enrichment.
+
+### 8. **s008-ALL_oryza_sativa_hormone.xlsx**
+   - Contains information about **hormones in rice**. It includes data relevant to plant hormone signaling pathways and their effects on rice physiology.
+
+### 9. **s009-ANNA_2024-03-23-rice-NLR.fa**
+   - This file contains **NLR (Nucleotide Binding Leucine-Rich Repeat) genes** sequences in rice. NLR genes play critical roles in immunity and are important for studying rice disease resistance.
+
+### 10. **s010-Osj_pep.fas.gz**
+   - Contains **protein sequences** for rice. This file is important for downstream analysis, including protein structure prediction and functional studies.
+
+### 11. **s011-Osj_cds.fas.gz**
+   - Contains **CDS (coding sequences)** for rice. This file includes the translated gene sequences for functional annotation and gene expression analysis.
+
+### 12. **s012-20230225_qPCR_R.md**
+   - A **R script** for calculating qPCR results. This script is useful for analyzing quantitative PCR data and conducting gene expression studies.
+
+### 13. **s013-20230221_qPCR_Python.py**
+   - A **Python script** for calculating qPCR results. This Python-based tool provides an alternative to the R script for analyzing qPCR data.
+
+### 14. **s014-Osj_TF_list.xlsx**
+   - Contains a list of **transcription factor (TF) IDs** for rice. This file is important for understanding the regulation of gene expression in rice and is used in transcription factor-based analyses.
+
+## Usage Instructions
+
+1. **Data Processing:**
+   - Use the rice genome annotations and lncRNA databases (found in `s001`, `s003`, `s004`) for transcript assembly and RNA-seq analysis.
+   - The ribosomal RNA file (`s002`) is used for filtering out rRNA from RNA-seq data before lncRNA identification.
+
+2. **Gene Enrichment Analysis:**
+   - For functional annotation and enrichment analysis, refer to the **GO**, **KEGG**, and **symbol ID** annotations provided in `s005` and `s007`.
+   - For enrichment analysis, use the `s006` package, which supports GO and KEGG enrichment tools.
+
+3. **Hormone Pathway Analysis:**
+   - Use `s008` for the analysis of plant hormones and their pathways, which are critical for studying rice immunity and other physiological traits.
+
+4. **NLR and Transcription Factor Studies:**
+   - For disease resistance and regulatory studies, refer to the **NLR gene sequences** in `s009` and the **transcription factors** in `s014`.
+
+5. **qPCR Analysis:**
+   - Analyze qPCR data using the provided R (`s012`) or Python (`s013`) scripts.
+
 ```
