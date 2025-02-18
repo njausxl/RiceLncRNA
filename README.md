@@ -242,18 +242,6 @@ hisat2-build ../../reference/Osativa_204_v7.0.fa rice7_index
 3. Validate reliability of key findings
 
 
-## License
-This repository is licensed under the MIT License. See the LICENSE file for more details.
-
-## Citation
-
-If you use this pipeline, please cite the following paper:
-
-Shan, X., Xia, S., Peng, L., Tang, C., Tao, S., Baig, A., & Zhao, H. (2024). Identification of Rice LncRNAs and Their Roles in the Rice Blast Resistance Network Using Transcriptome and Translatome. *Plants* (Under Review).
-
-## Contact Information
-- Issue Feedback: [GitHub Issues]
-- Email Contact: [sdausxl@126.com]
 
 ## Change Log
 - 2024-02-17: Initial Version V1.0 Release
@@ -329,5 +317,18 @@ Below is a list of files in this repository and their descriptions:
 
 5. **qPCR Analysis:**
    - Analyze qPCR data using the provided R (`s012`) or Python (`s013`) scripts.
+
+## License
+This repository is licensed under the MIT License. See the LICENSE file for more details.
+
+## Citation
+
+If you use this pipeline, please cite the following paper:
+
+Shan, X., Xia, S., Peng, L., Tang, C., Tao, S., Baig, A., & Zhao, H. (2025). Identification of Rice LncRNAs and Their Roles in the Rice Blast Resistance Network Using Transcriptome and Translatome. *Plants* (Under Review).
+
+## Contact Information
+- Issue Feedback: [GitHub Issues]
+- Email Contact: [sdausxl@126.com]
 
 ```
