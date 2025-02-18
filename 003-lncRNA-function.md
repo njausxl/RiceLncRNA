@@ -6,7 +6,7 @@ In this section, we focus on functional analysis of the identified lncRNAs. This
 
 ## 1) lncRNA and mRNA Quantification
 - Use **FeatureCounts** to quantify both lncRNAs and mRNAs. This step ensures we have the expression levels of both types of RNAs.
-  ```bash
+```bash
 # Set the input folder path
   input_folder=./input_folder
   
