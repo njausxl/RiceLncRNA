@@ -123,9 +123,8 @@ ls *gz|cut -d"_" -f 1|sort -u | while read id;
 data=/input_folder/;
         for file in $data/*.bam;
         do
-        # 获取文件名的前缀，去掉后缀和路径
         prefix=$(basename $file .bam)
-        # 运行stringtie，指定输出目录和文件名
+        # 运行stringtie，
         stringtie \
         -p 28 -v \
         -o /output_folder/$prefix.gtf $file
