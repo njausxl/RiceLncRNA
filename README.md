@@ -6,7 +6,8 @@ This project provides a comprehensive pipeline for lncRNA identification and ana
 
 
 This is the English version of the README. You can view the Chinese version of the README by clicking the link below:
-[点击这里查看中文版本的README]([README-Zh.md](https://github.com/njausxl/RiceLncRNA/edit/main/README-Zh.md))
+[点击这里查看中文版本的README](https://github.com/njausxl/RiceLncRNA/edit/main/README.md)
+ 
 
 The project consists of four main modules:
 - Module 001: Basic data processing environment for raw data QC, alignment, and assembly
