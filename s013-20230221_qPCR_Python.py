@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-
-
 ```python
 
 import pandas as pd
@@ -111,6 +108,6 @@ plt.show()
 
 # In[ ]:
 
-
+```
 
 
