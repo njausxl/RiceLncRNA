@@ -1,3 +1,4 @@
+```markdown
 # RiceLncRNA: 水稻长链非编码RNA优化鉴定流程
 
 ## 项目简介
@@ -340,6 +341,6 @@ snakemake --latency-wait 60 -ps snakemake.py --cores 22
 ## 注意事项
 - 本数据库中的所有数据和资源均基于**Oryza sativa Japonica（粳稻）**。如果您使用**Oryza sativa Indica（籼稻）**或其他品种的数据，请务必验证数据的兼容性。
 - `s006`中的富集分析包专门用于GO/KEGG富集分析，对于功能研究至关重要。
-
+```
 
 
