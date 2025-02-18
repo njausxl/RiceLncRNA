@@ -115,27 +115,32 @@ ls *gz|cut -d"_" -f 1|sort -u | while read id;
     > **Note**: Use the appropriate `--rna-strandness` option (e.g., `RF` or `FR`) based on the library preparation.
     
 
-## 6) Transcript Assembly and Merging
+# 6） Transcript Assembly and Merging
 
-- Assemble transcripts for each sample using `StringTie`, then optionally merge them (e.g., via `TACO`) if needed for lncRNA discovery.
+# 1. Assemble transcripts for each sample using StringTie
+# 2. Optionally merge the transcripts using TACO for lncRNA discovery
+
+# Set the input folder containing BAM files
+data="/input_folder/"
+
+# Loop through each BAM file in the data folder
+for file in $data/*.bam; do
+    # Extract the base name of the file (without extension)
+    prefix=$(basename $file .bam)
     
-    ```bash
-data=/input_folder/;
-        for file in $data/*.bam;
-        do
-        prefix=$(basename $file .bam)
-        # 运行stringtie，
-        stringtie \
-        -p 28 -v \
-        -o /output_folder/$prefix.gtf $file
-        done
-        
-    taco_run -p 8 \
-    -o ./TACO_results \
-    ./lncRNA_gtf.list \
-    --ref-genome-fasta /reference_genome.fa \
-    --filter-splice-juncs   
-    ```
+    # Run StringTie for transcript assembly
+    stringtie -p 28 -v \
+              -o /output_folder/$prefix.gtf $file
+done
+
+# Merge the assembled transcripts using TACO (Optional)
+# Set the number of threads and specify the output folder
+taco_run -p 8 \
+         -o ./TACO_results \
+         ./lncRNA_gtf.list \
+         --ref-genome-fasta /reference_genome.fa \
+         --filter-splice-juncs
+
     
 
 ## 7) Using the CodingRNA Database to Extract Class Codes
