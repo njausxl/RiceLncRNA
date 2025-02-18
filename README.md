@@ -1,5 +1,3 @@
-
-
 # RiceLncRNA: An Optimized Pipeline for Rice Long Non-coding RNA Identification
 
 ## Project Overview
@@ -252,4 +250,4 @@ Shan, X., Xia, S., Peng, L., Tang, C., Tao, S., Baig, A., & Zhao, H. (2024). Ide
 - 2024-02-17: Initial Version V1.0 Release
 - Upcoming: Continuous pipeline optimization
 - Upcoming: Addition of new analysis tools
-````
+```
