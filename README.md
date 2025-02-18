@@ -241,6 +241,51 @@ hisat2-build ../../reference/Osativa_204_v7.0.fa rice7_index
 2. Focus on data quality control results
 3. Validate reliability of key findings
 
+
+## RiceLncRNA Repository
+
+### 1. Overview
+
+This repository contains essential datasets and tools for the analysis of long non-coding RNAs (lncRNAs) in rice, focusing on their roles in plant immunity.
+
+### 2. Dataset Contents
+
+#### 2.1 OSA rRNA
+- **File**: `OSA_rRNA.fa`
+- **Description**: Contains the ribosomal RNA (rRNA) sequences of rice (*Oryza sativa*). This file is used for filtering rRNA contamination during RNA-seq preprocessing.
+
+#### 2.2 OSA Known LncRNA
+- **File**: `OSA_Known_LncRNA.zip`
+- **Description**: A zip file containing known lncRNA sequences from multiple lncRNA databases specifically for rice. It is useful for the identification and annotation of lncRNAs in rice.
+
+#### 2.3 Rice7 Genomic Data
+- **File**: `rice7_all_fa.zip`
+- **Description**: This archive contains the rice genome sequence (MSU v7) in FASTA format. It serves as a reference for genome-wide RNA-seq alignment and other genomic analyses.
+
+- **File**: `rice7_all_gtf.zip`
+- **Description**: Contains the MSU v7 gene annotation in GTF format. It is essential for the functional annotation of RNA-seq data.
+
+#### 2.4 Org RiceDB (GO/KEGG Enrichment)
+- **File**: `org_riceDB_AH94060.zip`
+- **Description**: This archive contains the rice-specific annotation database (OrgDb) used for performing GO and KEGG enrichment analyses. It provides necessary gene annotations for functional analysis of rice-related data.
+
+### 3. Dataset Usage
+
+These datasets provide fundamental resources for transcriptomic and functional analyses, such as the identification of lncRNAs, alignment of RNA-seq data, and gene annotation. You can use these files for a variety of bioinformatics analyses, such as:
+
+- **rRNA Filtering**: Use `OSA_rRNA.fa` to filter out rRNA sequences during RNA-seq preprocessing.
+- **LncRNA Identification**: Use `OSA_Known_LncRNA.zip` to compare with newly identified lncRNAs in your RNA-seq dataset.
+- **Genomic Alignment**: Align your RNA-seq reads to the reference genome found in `rice7_all_fa.zip`.
+- **Gene Annotation**: Annotate your aligned reads using the `rice7_all_gtf.zip` file.
+- **GO/KEGG Enrichment**: For functional enrichment analysis, `org_riceDB_AH94060.zip` is used to provide necessary gene annotations for rice.
+
+### 4. Acknowledgements
+
+The datasets and annotations used in this repository have been generously provided by various contributors. These datasets are crucial for the research and development of the RiceLncRNA pipeline and facilitate the study of lncRNAs in rice.
+
+## License
+This repository is licensed under the MIT License. See the LICENSE file for more details.
+
 ## Citation
 
 If you use this pipeline, please cite the following paper:
