@@ -1,0 +1,270 @@
+# RiceLncRNA: 水稻长链非编码RNA优化鉴定流程
+
+## 项目简介
+
+本项目提供了一个完整的lncRNA鉴定和分析流程，从CodingRNA数据库的构建到lncRNA的鉴定和分析。该流程整合了多个生物信息学工具，实现了从原始数据处理到功能注释的全流程分析。
+
+本项目分为四个主要模块：
+- 001模块：CodingRNA database构建，用于原始翻译组数据质控、比对和组装和融合
+- 002模块：lncRNA组装和鉴定环境，专注于非编码RNA的预测
+- 003模块：功能分析环境，进行表达量分析，关键lncRNA的筛选和功能注释
+- 004模块：基础数据处理环境（snakemake 一键运行），用于原始数据质控、比对和组装
+
+⚠️ 重要提示：
+- 本流程涉及Python、R、Perl等多种编程语言
+- 集成了30多个专业生物信息学软件
+- 由于依赖复杂，无法实现一键安装和使用
+- 建议按照文档逐步安装和运行各个模块
+- 每个步骤都需要验证输出结果后再进行下一步
+
+## 功能特点
+- CodingRNA数据库的构建
+- 原始数据质控和预处理
+- 基于参考基因组的转录本组装
+- 长链非编码RNA的严格筛选流程
+- 转录本功能注释与分析
+- 支持多样本并行处理
+- 整合多个专业生物信息学工具
+
+## 系统要求
+
+- Linux/Unix 操作系统
+- Python ≥ 3.7
+- R ≥ 4.0
+- Conda 包管理器
+
+## 依赖工具
+
+主要生物信息学工具：
+- HISAT2 (转录组比对)
+- StringTie (转录本组装)
+- TACO (转录本整合)
+- FastQC (测序数据质控)
+- Samtools (SAM/BAM文件处理)
+- MultiQC (质控报告整合)
+- Bowtie2 (转录组比对)
+- GFFread (GFF/GTF文件转换)
+- Gffcompare (转录本组装评估)
+- Fastp (原始数据质控)
+- TrimGalore (原始数据质控)
+- seqkit (序列处理)
+- transeq (序列翻译)
+- pfam_scan.pl (Pfam数据库比对)
+- cmscan (Rfam数据库比对)
+- Diamond (NR数据库比对)
+- Snakemake (流程管理)
+- PLEK (lncRNA鉴定)
+- cnci (lncRNA鉴定)
+- cpc2 (lncRNA鉴定)
+- FeatureCounts (表达量定量)
+- DESeq2 (差异表达分析)
+- wgcna (WGCNA分析)
+- clusterProfiler (功能富集分析)
+- gseGO (GO富集分析)
+- gseKEGG (KEGG富集分析)
+- enrichplot (富集结果可视化)
+- ggplot2 (结果可视化)
+
+
+## 安装说明
+
+
+1. 创建三个独立的conda环境：
+
+### 环境001：基础数据处理环境
+```bash
+conda create -n lncrna_001 python=3.7
+conda activate lncrna_001
+conda install -c bioconda hisat2 stringtie taco fastqc samtools multiqc bowtie2 gffread gffcompare fastp trim-galore seqkit emboss
+```
+
+### 环境002：lncRNA鉴定环境
+```bash
+conda create -n lncrna_002 python=3.7
+conda activate lncrna_002
+conda install -c bioconda plek cnci cpc2
+conda install -c bioconda diamond pfam_scan hmmer infernal
+```
+
+### 环境003：功能分析环境
+```bash
+conda create -n lncrna_003 r=4.0
+conda activate lncrna_003
+conda install -c bioconda bioconductor-deseq2 bioconductor-wgcna bioconductor-clusterprofiler
+conda install -c conda-forge r-ggplot2
+conda install -c bioconda subread  # 用于 FeatureCounts
+```
+
+2. 创建工作目录：
+```bash
+# 创建主目录
+mkdir -p ~/rice_lncrna_pipeline
+cd ~/rice_lncrna_pipeline
+
+# 创建原始数据目录
+mkdir -p raw_data/{sra,fastq}
+
+# 创建质控相关目录
+mkdir -p qc/{fastqc,multiqc}
+
+# 创建比对和组装目录
+mkdir -p alignment/{hisat2_index,hisat2_output,stringtie_output}
+mkdir -p assembly/{taco_output,merged_transcripts}
+
+# 创建lncRNA鉴定目录
+mkdir -p lncrna/{plek,cnci,cpc2,merged_results}
+
+# 创建功能分析目录
+mkdir -p analysis/{expression,deseq2,wgcna,enrichment}
+
+# 创建结果和日志目录
+mkdir -p results
+mkdir -p logs
+```
+
+3. 下载参考基因组：
+```bash
+cd ~/rice_lncrna_pipeline
+wget http://rice.plantbiology.msu.edu/pub/data/Eukaryotic_Projects/o_sativa/annotation_dbs/pseudomolecules/version_7.0/all.dir/Osativa_204_v7.0.fa.gz
+gunzip Osativa_204_v7.0.fa.gz
+mv Osativa_204_v7.0.fa reference/
+cd alignment/hisat2_index
+hisat2-build ../../reference/Osativa_204_v7.0.fa rice7_index
+```
+
+## 分析流程
+
+### 1. 编码RNA数据库构建（环境001）
+- 数据收集与下载
+- 数据质量控制
+- rRNA序列去除
+- 参考基因组比对
+- 转录本组装与合并
+- 与参考基因组注释比较
+- 最终融合原始基因组注释，数据库生成
+
+### 2. RNA-seq数据分析（环境002）
+
+#### 2.1 数据收集与下载
+- 收集已发表的水稻RNA-seq数据
+- 使用SRA工具包下载原始数据
+- 转换为FASTQ格式
+
+#### 2.2 数据质量控制
+- FastQC进行质量评估
+- MultiQC整合质控报告
+- Fastp去除低质量序列和接头
+
+#### 2.3 rRNA序列去除
+- Bowtie2比对到rRNA数据库
+- 提取非rRNA序列
+- 质量再评估
+
+#### 2.4 参考基因组比对
+- 使用HISAT2进行比对
+- SAMtools转换和排序BAM文件
+- 生成比对统计报告
+
+#### 2.5 转录本组装与合并
+- StringTie进行转录本组装
+- 合并多个样本的GTF文件
+- 生成非冗余转录本集
+
+#### 2.6 参考基因组注释比较
+- 使用GFFcompare比较注释文件
+- 提取已知编码基因
+- 构建编码RNA数据库
+
+### 3. 非编码RNA数据库构建（环境002）
+
+#### 3.1 数据预处理
+- 提取class code为i,u,x,o,p的转录本
+- 长度筛选（>200nt）
+- 外显子数量筛选
+
+#### 3.2 编码潜能评估
+- CPC2分析
+- CNCI分析
+- PLEK分析
+- Rfam/Pfam/NR数据库比对
+- 整合所有软件的鉴定结果
+
+#### 3.3 LncRNA分类
+- 鉴定长链非编码RNA
+- 分类（反义、内含子、基因间等）
+- 整合已知lncRNA数据库信息
+
+### 4. 功能分析与注释（环境003）
+
+#### 4.1 表达量分析
+- 计算各样本中的表达量
+- 表达量标准化
+- 样本相关性分析
+
+#### 4.2 差异表达分析
+- DESeq2差异表达分析
+- 筛选差异表达基因
+
+#### 4.3 共表达网络分析
+- WGCNA共表达网络构建
+- 模块识别与分析
+- 关键基因筛选
+
+#### 4.4 功能富集分析
+- GO功能富集分析
+- KEGG通路富集分析
+- 功能注释可视化
+
+#### 4.5 单个lncRNA GSEA分析
+- 功能富集分析
+- 结果可视化
+
+## 注意事项
+
+### 环境配置
+1. 确保已正确安装所有依赖包
+2. 检查各软件版本兼容性
+3. 合理分配计算资源
+
+### 数据处理
+1. 定期备份重要数据
+2. 记录关键参数设置
+3. 保存分析日志文件
+
+### 结果解释
+1. 注意生物学重复性
+2. 关注数据质量控制结果
+3. 验证关键发现的可靠性
+
+## 引用说明
+
+如果您使用了本流程，请引用以下文章：
+
+Shan, X., Xia, S., Peng, L., Tang, C., Tao, S., Baig, A., & Zhao, H. (2025). Identification of Rice LncRNAs and Their Roles in the Rice Blast Resistance Network Using Transcriptome and Translatome. *Plants* (Under Review).
+
+## 联系方式
+- 问题反馈：[GitHub Issues]
+- 邮件联系：[sdausxl@126.com]
+
+## 运行CodingRNA database 构建示例
+
+使用Snakemake运行完整流程：
+
+```bash
+snakemake --latency-wait 60 -ps snakemake.py --cores 22
+```
+
+## 输入文件要求
+
+- 原始数据：SRA格式或压缩的FASTQ文件
+- 参考基因组：FASTA格式
+- 基因组注释：GTF/GFF3格式
+
+## 输出文件说明
+
+- 质控报告：FastQC和MultiQC报告
+- 比对文件：排序后的BAM文件
+- 编码转录本注释：GTF格式
+- 鉴定的CodingRNA序列：FASTA格式
+```
+
