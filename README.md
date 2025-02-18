@@ -4,6 +4,10 @@
 
 This project provides a comprehensive pipeline for lncRNA identification and analysis, from CodingRNA database construction to lncRNA identification and analysis. The pipeline integrates multiple bioinformatics tools to achieve full-process analysis from raw data processing to functional annotation.
 
+
+This is the English version of the README. You can view the Chinese version of the README by clicking the link below:
+[点击这里查看中文版本的README]([README-Zh.md](https://github.com/njausxl/RiceLncRNA/edit/main/README-Zh.md))
+
 The project consists of four main modules:
 - Module 001: Basic data processing environment for raw data QC, alignment, and assembly
 - Module 002: LncRNA identification environment focusing on non-coding RNA prediction and screening
