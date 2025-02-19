@@ -1,7 +1,7 @@
 ![Snakemake](https://img.shields.io/badge/snakemake-%3E%3D6.1.0-green)
 ![MIT License](https://img.shields.io/badge/license-MIT-blue)
 # RiceLncRNA: An Optimized Pipeline for Rice Long Non-coding RNA Identification
-![image](https://github.com/user-attachments/assets/5429a968-c1dc-4e0f-afad-e7855b1e05fa)
+![image](https://github.com/user-attachments/assets/f862aa23-44d3-4d9a-93bf-685fa949b899)
 ## Project Overview
 
 This project provides a comprehensive pipeline for lncRNA identification and analysis, from CodingRNA database construction to lncRNA identification and analysis. The pipeline integrates multiple bioinformatics tools to achieve full-process analysis from raw data processing to functional annotation.
