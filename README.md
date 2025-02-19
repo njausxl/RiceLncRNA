@@ -1,13 +1,9 @@
 # RiceLncRNA: An Optimized Pipeline for Rice Long Non-coding RNA Identification
-
+![image](https://github.com/user-attachments/assets/5429a968-c1dc-4e0f-afad-e7855b1e05fa)
 ## Project Overview
 
 This project provides a comprehensive pipeline for lncRNA identification and analysis, from CodingRNA database construction to lncRNA identification and analysis. The pipeline integrates multiple bioinformatics tools to achieve full-process analysis from raw data processing to functional annotation.
 
-
-This is the English version of the README. You can view the Chinese version of the README by clicking the link below:
-[Chinese README](https://github.com/njausxl/RiceLncRNA/edit/main/README-Zh.md)
- 
 
 The project consists of four main modules:
 - Module 001: Basic data processing environment for raw data QC, alignment, and assembly
