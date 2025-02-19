@@ -6,7 +6,7 @@ This project provides a comprehensive pipeline for lncRNA identification and ana
 
 
 This is the English version of the README. You can view the Chinese version of the README by clicking the link below:
-[Chinese README](https://github.com/njausxl/RiceLncRNA/edit/main/README.md)
+[Chinese README](https://github.com/njausxl/RiceLncRNA/edit/main/README-Zh.md)
  
 
 The project consists of four main modules:
