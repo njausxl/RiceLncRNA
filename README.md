@@ -1,3 +1,5 @@
+![Snakemake](https://img.shields.io/badge/snakemake-%3E%3D6.1.0-green)
+![MIT License](https://img.shields.io/badge/license-MIT-blue)
 # RiceLncRNA: An Optimized Pipeline for Rice Long Non-coding RNA Identification
 ![image](https://github.com/user-attachments/assets/5429a968-c1dc-4e0f-afad-e7855b1e05fa)
 ## Project Overview
