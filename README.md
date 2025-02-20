@@ -1,5 +1,6 @@
 ![Snakemake](https://img.shields.io/badge/snakemake-%3E%3D6.1.0-green)
 ![MIT License](https://img.shields.io/badge/license-MIT-blue)
+![DOI](https://img.shields.io/badge/DOI-10.20944%2Fpreprints202502.1634.v1-blue)
 # RiceLncRNA: An Optimized Pipeline for Rice Long Non-coding RNA Identification
 ![image](https://github.com/user-attachments/assets/f862aa23-44d3-4d9a-93bf-685fa949b899)
 ## Project Overview
@@ -324,6 +325,7 @@ This repository is licensed under the MIT License. See the LICENSE file for more
 If you use this pipeline, please cite the following paper:
 
 Shan, X., Xia, S., Peng, L., Tang, C., Tao, S., Baig, A., & Zhao, H. (2025). Identification of Rice LncRNAs and Their Roles in the Rice Blast Resistance Network Using Transcriptome and Translatome. *Plants* (Under Review).
+Doi: 10.20944/preprints202502.1634.v1
 
 ## Contact Information
 - Issue Feedback: [GitHub Issues]
