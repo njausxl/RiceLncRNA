@@ -1,5 +1,4 @@
 ![Snakemake](https://img.shields.io/badge/snakemake-%3E%3D6.1.0-green)
-![MIT License](https://img.shields.io/badge/license-MIT-blue)
 ![DOI](https://img.shields.io/badge/DOI-10.20944%2Fpreprints202502.1634.v1-blue)
 # RiceLncRNA: An Optimized Pipeline for Rice Long Non-coding RNA Identification
 ![image](https://github.com/user-attachments/assets/f862aa23-44d3-4d9a-93bf-685fa949b899)
@@ -317,8 +316,6 @@ Below is a list of files in this repository and their descriptions:
 5. **qPCR Analysis:**
    - Analyze qPCR data using the provided R (`s012`) or Python (`s013`) scripts.
 
-## License
-This repository is licensed under the MIT License. See the LICENSE file for more details.
 
 ## Citation
 
