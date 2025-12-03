@@ -36,9 +36,14 @@ In this section, we focus on identifying long non-coding RNAs (lncRNAs). We assu
     multiqc output_folder/
     
     ## Remove adapters and low-quality sequences.
-    ls *fastq.gz|cut -d"_" -f 1|sort -u | while read id;
+    # Original sequential processing:
+    # ls *fastq.gz|cut -d"_" -f 1|sort -u | while read id;
+    # do
+    # fastp ...
+    # done
     
-    do
+    # Optimized: Use for loop instead of while read for better performance
+    for id in $(ls *fastq.gz | cut -d"_" -f 1 | sort -u); do
     fastp \
     --detect_adapter_for_pe \
     --in1 ./${id}_1.fastq.gz \
@@ -54,6 +59,15 @@ In this section, we focus on identifying long non-coding RNAs (lncRNAs). We assu
     -n 4 \
     2> ./${id}_fastp.log
     done
+
+    # For parallel processing (recommended), use GNU parallel:
+    # ls *fastq.gz | cut -d"_" -f 1 | sort -u | \
+    # parallel -j 4 'fastp --detect_adapter_for_pe \
+    #   --in1 ./{}_1.fastq.gz --in2 ./{}_2.fastq.gz \
+    #   --out1 ./{}_R1.fastq.gz --out2 ./{}_R2.fastq.gz \
+    #   --html ./{}_fastp.html \
+    #   -w 4 -z 7 -q 30 -u 20 -c -n 4 \
+    #   2> ./{}_fastp.log'
 
 
   
@@ -281,10 +295,13 @@ wc -l cnci_msu_id.txt
 
 
 ## 4. The intersection of three software.
-cat *txt | sort | uniq -c | awk '{if($1==3){print}}' | wc -l
-10875
+# Optimized: Combine operations to process data only once
+# Note: Output is split - count goes to stdout, IDs go to file
+cat *txt | sort | uniq -c | awk '$1==3{count++; print $2 > "3_noncoding_msu.id"} END{print "Total:", count}'
 
-cat *txt | sort | uniq -c | awk '{if($1==3){print $2}}' > 3_noncoding_msu.id
+# Alternative approach for clearer separation:
+# Count and save IDs simultaneously
+cat *txt | sort | uniq -c | awk '$1==3{print $2}' | tee 3_noncoding_msu.id | wc -l
 
 ## 5. The identification results
 

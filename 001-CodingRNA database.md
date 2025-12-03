@@ -29,9 +29,14 @@ fastqc -t 40 SRR_ID.fastq.gz -o output_folder/ 2> SRR_ID.log
 multiqc output_folder/
 
 ## Remove adapters and low-quality sequences.
-ls *fastq.gz|cut -d"_" -f 1|sort -u | while read id;
+# Original sequential processing (slower):
+# ls *fastq.gz|cut -d"_" -f 1|sort -u | while read id;
+# do
+# fastp ...
+# done
 
-do
+# Optimized approach 1: Sequential with better practices
+for id in $(ls *fastq.gz | cut -d"_" -f 1 | sort -u); do
 fastp \
 --detect_adapter_for_pe \
 --in1 ./${id}_1.fastq.gz \
@@ -47,6 +52,19 @@ fastp \
 -n 4 \
 2> ./1_pair_fastp/${id}_fastp.log
 done
+
+# Optimized approach 2: Parallel processing (recommended for multiple files)
+# Install GNU parallel: sudo apt-get install parallel
+# This can process multiple files simultaneously, significantly reducing total time
+# Adjust -j parameter based on available CPU cores (e.g., -j 4 for 4 parallel jobs)
+# ls *fastq.gz | cut -d"_" -f 1 | sort -u | \
+# parallel -j 4 'fastp --detect_adapter_for_pe \
+#   --in1 ./{}_1.fastq.gz --in2 ./{}_2.fastq.gz \
+#   --out1 ./1_pair_fastp/{}_R1.fastq.gz --out2 ./1_pair_fastp/{}_R2.fastq.gz \
+#   --html ./1_pair_fastp/{}_fastp.html \
+#   -w 4 -z 7 -q 30 -u 20 -c -n 4 \
+#   2> ./1_pair_fastp/{}_fastp.log'
+
 
 ## Second Remove adapters and low-quality sequences.
 for id in {95..98}
