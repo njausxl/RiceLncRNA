@@ -210,29 +210,23 @@ for file_path in file_list:
 
 **Optimized Code:**
 ```python
-# Use list comprehension for better performance
+# More readable and efficient version
 from pathlib import Path
-
-results = [
-    [
-        Path(file_path).name,
-        (df := pd.read_csv(file_path))[df.columns[-1]].eq('up').sum(),
-        df[df.columns[-1]].eq('down').sum()
-    ]
-    for file_path in file_list
-]
-
-# Alternative: Use concurrent processing for many files
-from concurrent.futures import ProcessPoolExecutor
 
 def process_file(file_path):
     df = pd.read_csv(file_path)
-    last_col = df.columns[-1]
+    last_col = df.columns[-1]  # Store column name for reuse
+    value_counts = df[last_col].value_counts()
     return [
         Path(file_path).name,
-        (df[last_col] == 'up').sum(),
-        (df[last_col] == 'down').sum()
+        value_counts.get('up', 0),
+        value_counts.get('down', 0)
     ]
+
+results = [process_file(file_path) for file_path in file_list]
+
+# Alternative: Use concurrent processing for many files
+from concurrent.futures import ProcessPoolExecutor
 
 with ProcessPoolExecutor() as executor:
     results = list(executor.map(process_file, file_list))

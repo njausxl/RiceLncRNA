@@ -295,12 +295,13 @@ wc -l cnci_msu_id.txt
 
 
 ## 4. The intersection of three software.
-# Original approach (reads data twice):
-# cat *txt | sort | uniq -c | awk '{if($1==3){print}}' | wc -l
-# cat *txt | sort | uniq -c | awk '{if($1==3){print $2}}' > 3_noncoding_msu.id
-
 # Optimized: Combine operations to process data only once
+# Note: Output is split - count goes to stdout, IDs go to file
 cat *txt | sort | uniq -c | awk '$1==3{count++; print $2 > "3_noncoding_msu.id"} END{print "Total:", count}'
+
+# Alternative approach for clearer separation:
+# Count and save IDs simultaneously
+cat *txt | sort | uniq -c | awk '$1==3{print $2}' | tee 3_noncoding_msu.id | wc -l
 
 ## 5. The identification results
 

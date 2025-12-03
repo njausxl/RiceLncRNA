@@ -426,8 +426,8 @@ file_pattern = 'example_folder/*_sig_padj.csv'
 # Get all files matching the pattern
 file_list = glob.glob(file_pattern)
 
-# Optimized: Use list comprehension and vectorized operations for better performance
-# This is significantly faster than iterating through each file in a loop
+# Optimized: Use .value_counts() for better performance when counting specific values
+# This is faster than using multiple .sum() calls on boolean masks
 results = []
 for file_path in file_list:
     df = pd.read_csv(file_path)

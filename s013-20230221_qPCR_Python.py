@@ -21,8 +21,9 @@ data['∆Ct'] = data['Ct'] - data['Group'].map(ct_reference)
 data['∆Ct']
 
 # Optimized: Combine groupby operations to process both groups at once
-# This reduces memory overhead and improves performance
-delta_ct_means = data.groupby(['Group', 'Gene'])['∆Ct'].mean().reset_index()
+# For large datasets, this reduces memory overhead and improves performance
+# For small datasets, the difference may be negligible
+delta_ct_means = data.groupby(['Group', 'Gene'], as_index=False)['∆Ct'].mean()
 ck_ΔCt_means = delta_ct_means[delta_ct_means['Group'] == 'ck'][['Gene', '∆Ct']].reset_index(drop=True)
 treat_ΔCt_means = delta_ct_means[delta_ct_means['Group'] == 'treat'][['Gene', '∆Ct']].reset_index(drop=True)
 
@@ -55,7 +56,7 @@ data
 #treat_rel_exp_means = data.loc[data['Group'] == 'treat', ['Gene', 'Rel Exp']].groupby('Gene').mean().reset_index()
 #treat_rel_exp_means
 
-# 计算每个样本相对表达量的均值 - Already optimized, but ensure proper column names
+# 计算每个样本相对表达量的均值 - Use as_index=False consistently
 mean_rel_exp = data.groupby(['Gene', 'Group'], as_index=False)['Rel Exp'].mean()
 
 # 更改列名
