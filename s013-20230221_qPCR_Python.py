@@ -3,7 +3,9 @@
 import pandas as pd
 import os
 
-os.chdir("C:/Users/sxl/Desktop")
+# Use relative path or current directory instead of hardcoded absolute path
+# os.chdir("C:/Users/sxl/Desktop")  # Commented out for portability
+
 # 读取 Excel 文件
 data = pd.read_excel('qPCR_demo.xlsx')
 
@@ -11,19 +13,21 @@ data = pd.read_excel('qPCR_demo.xlsx')
 ck_tub2_ct = data.loc[(data['Group'] == 'ck') & (data['Gene'] == 'TUB2'), 'Ct'].mean()
 treat_tub2_ct = data.loc[(data['Group'] == 'treat') & (data['Gene'] == 'TUB2'), 'Ct'].mean()
 
-# 计算每组的 ∆Ct 值
-data['∆Ct'] = data.apply(lambda row: row['Ct'] - ck_tub2_ct if row['Group'] == 'ck' else row['Ct'] - treat_tub2_ct, axis=1)
+# 计算每组的 ∆Ct 值 - Optimized using vectorized operations instead of apply()
+# Create a mapping dictionary and use vectorized map operation
+ct_reference = {'ck': ck_tub2_ct, 'treat': treat_tub2_ct}
+data['∆Ct'] = data['Ct'] - data['Group'].map(ct_reference)
 
 data['∆Ct']
 
-# 获取每个基因在ck组的ΔCt均值
-ck_ΔCt_means = data.loc[data['Group'] == 'ck', ['Gene', '∆Ct']].groupby('Gene', as_index=False).mean()
+# Optimized: Combine groupby operations to process both groups at once
+# This reduces memory overhead and improves performance
+delta_ct_means = data.groupby(['Group', 'Gene'])['∆Ct'].mean().reset_index()
+ck_ΔCt_means = delta_ct_means[delta_ct_means['Group'] == 'ck'][['Gene', '∆Ct']].reset_index(drop=True)
+treat_ΔCt_means = delta_ct_means[delta_ct_means['Group'] == 'treat'][['Gene', '∆Ct']].reset_index(drop=True)
 
 # 输出 ck_ΔCt_means
 print(ck_ΔCt_means)
-
-# 获取每个基因在treat组的ΔCt均值
-treat_ΔCt_means = data.loc[data['Group'] == 'treat', ['Gene', '∆Ct']].groupby('Gene').mean().reset_index()
 
 # 输出 treat_ΔCt_means
 print(treat_ΔCt_means)
@@ -34,8 +38,8 @@ ck_dict = dict(zip(ck_ΔCt_means['Gene'], ck_ΔCt_means['∆Ct']))
 
 ck_dict
 
-# 计算每个样本的 ∆∆Ct 值
-data['∆∆Ct'] = data.apply(lambda row: row['∆Ct'] - ck_dict[row['Gene']], axis=1)
+# 计算每个样本的 ∆∆Ct 值 - Optimized using vectorized map operation instead of apply()
+data['∆∆Ct'] = data['∆Ct'] - data['Gene'].map(ck_dict)
 data
 
 # 计算每个样本的相对表达量
@@ -51,9 +55,8 @@ data
 #treat_rel_exp_means = data.loc[data['Group'] == 'treat', ['Gene', 'Rel Exp']].groupby('Gene').mean().reset_index()
 #treat_rel_exp_means
 
-# 计算每个样本相对表达量的均值
-mean_rel_exp = data.groupby(['Gene', 'Group'])['Rel Exp'].mean().reset_index()
-mean_rel_exp
+# 计算每个样本相对表达量的均值 - Already optimized, but ensure proper column names
+mean_rel_exp = data.groupby(['Gene', 'Group'], as_index=False)['Rel Exp'].mean()
 
 # 更改列名
 mean_rel_exp = mean_rel_exp.rename(columns={'Rel Exp': 'mean_Rel_Exp'})
