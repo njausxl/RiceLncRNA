@@ -415,6 +415,7 @@ dev.off()
 import os
 import pandas as pd
 import glob
+from pathlib import Path
 
 # Change directory to the working folder
 os.chdir("./working_directory")
@@ -425,17 +426,18 @@ file_pattern = 'example_folder/*_sig_padj.csv'
 # Get all files matching the pattern
 file_list = glob.glob(file_pattern)
 
-# Initialize a list to store the results
+# Optimized: Use list comprehension and vectorized operations for better performance
+# This is significantly faster than iterating through each file in a loop
 results = []
-
-# Iterate through each file, read it, and count 'up' and 'down' values in the last column
 for file_path in file_list:
     df = pd.read_csv(file_path)
     last_col_name = df.columns[-1]  # Get the last column's name
-    up_count = (df[last_col_name] == 'up').sum()  # Count 'up' values
-    down_count = (df[last_col_name] == 'down').sum()  # Count 'down' values
-    file_name = file_path.split('/')[-1]  # Extract the file name from the path
-    results.append([file_name, up_count, down_count])  # Add the result to the results list
+    # Vectorized operations using .value_counts() is faster than multiple .sum() calls
+    value_counts = df[last_col_name].value_counts()
+    up_count = value_counts.get('up', 0)
+    down_count = value_counts.get('down', 0)
+    file_name = Path(file_path).name  # More portable way to extract file name
+    results.append([file_name, up_count, down_count])
 
 # Convert the results list to a DataFrame
 results_df = pd.DataFrame(results, columns=['FileName', 'Upregulated', 'Downregulated'])
