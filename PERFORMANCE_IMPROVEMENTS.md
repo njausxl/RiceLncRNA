@@ -43,7 +43,8 @@ treat_ΔCt_means = data.loc[data['Group'] == 'treat', ['Gene', '∆Ct']].groupby
 
 **Optimized Code:**
 ```python
-delta_ct_means = data.groupby(['Group', 'Gene'])['∆Ct'].mean().reset_index()
+# Use as_index=False consistently for cleaner code
+delta_ct_means = data.groupby(['Group', 'Gene'], as_index=False)['∆Ct'].mean()
 ck_ΔCt_means = delta_ct_means[delta_ct_means['Group'] == 'ck'][['Gene', '∆Ct']].reset_index(drop=True)
 treat_ΔCt_means = delta_ct_means[delta_ct_means['Group'] == 'treat'][['Gene', '∆Ct']].reset_index(drop=True)
 ```
@@ -139,7 +140,13 @@ merged_df <- as.data.frame(merged_df)
 ```r
 # Keep using data.table operations which are faster
 mRNA_lncRNA_counts <- fread(mrna_lncrna_file, key = "gene")
-# Use data.table's built-in aggregation
+
+# Extract matching gene expression matrices (as shown in original code)
+matching_lncRNA_matrix <- mRNA_lncRNA_counts[gene %in% lncRNA_list, ]
+matching_mRNA_matrix <- mRNA_lncRNA_counts[gene %in% mRNA_list, ]
+mRNA_lncRNA_matrix <- rbind(matching_lncRNA_matrix, matching_mRNA_matrix)
+
+# Use data.table's built-in aggregation instead of converting to data.frame
 merged_df <- mRNA_lncRNA_matrix[, lapply(.SD, mean, na.rm = TRUE), by = gene]
 # Only convert to matrix/data.frame when necessary for specific operations
 ```
